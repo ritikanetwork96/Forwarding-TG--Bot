@@ -73,6 +73,12 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
   // Status/Error Feedback
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Whether initialPost is already published (requiring new post creation on re-send)
+  const isAlreadyPublished = Boolean(
+    initialPost &&
+      (initialPost.status === 'published' || initialPost.status === 'partially_published')
+  );
+
   // Queries
   const { data: destinations = [] } = useQuery({
     queryKey: ['destinations'],
@@ -268,7 +274,8 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
       let targetPostId: string;
 
       // 3. Handle Existing Post Update vs New Post Creation
-      if (initialPost) {
+      // If the post is already published, create a new post rather than updating the historical post (avoiding 400 error)
+      if (initialPost && !isAlreadyPublished) {
         targetPostId = initialPost._id;
         await PostService.update(initialPost._id, {
           categoryId: selectedCategoryId || null,
@@ -371,7 +378,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
           height: m.height,
         }));
 
-      if (initialPost) {
+      if (initialPost && !isAlreadyPublished) {
         return PostService.update(initialPost._id, {
           categoryId: selectedCategoryId || null,
           content: {
@@ -470,7 +477,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
                 <h2 className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2 font-display">
                   <span>Publishing Studio</span>
                   <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full uppercase tracking-wider">
-                    {initialPost ? 'Edit Post' : 'Composer'}
+                    {initialPost ? (isAlreadyPublished ? 'Re-send / Forward' : 'Edit Post') : 'Composer'}
                   </span>
                 </h2>
 
