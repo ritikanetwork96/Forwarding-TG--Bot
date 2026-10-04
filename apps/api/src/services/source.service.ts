@@ -7,7 +7,7 @@ import {
   type ChatType,
 } from '@telegram-forwarder/shared';
 
-export function formatSourceDTO(source: ISource): SourceDTO {
+export function formatSourceDTO(source: any): SourceDTO {
   return {
     _id: source._id.toString(),
     telegramChatId: source.telegramChatId,
@@ -16,9 +16,9 @@ export function formatSourceDTO(source: ISource): SourceDTO {
     type: source.type,
     status: source.status,
     lastMessageId: source.lastMessageId,
-    lastIngestedAt: source.lastIngestedAt ? source.lastIngestedAt.toISOString() : null,
-    createdAt: source.createdAt.toISOString(),
-    updatedAt: source.updatedAt.toISOString(),
+    lastIngestedAt: source.lastIngestedAt ? new Date(source.lastIngestedAt).toISOString() : null,
+    createdAt: new Date(source.createdAt).toISOString(),
+    updatedAt: new Date(source.updatedAt).toISOString(),
   };
 }
 
@@ -29,7 +29,7 @@ export class SourceService {
       filter.status = query.status;
     }
 
-    const sources = await Source.find(filter).sort({ createdAt: -1 });
+    const sources = await Source.find(filter).sort({ createdAt: -1 }).lean();
     return sources.map(formatSourceDTO);
   }
 

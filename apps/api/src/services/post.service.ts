@@ -10,7 +10,7 @@ import {
 } from '@telegram-forwarder/shared';
 import { Types } from 'mongoose';
 
-export function formatMessageDTO(msg: IMessage): MessageDTO {
+export function formatMessageDTO(msg: any): MessageDTO {
   return {
     _id: msg._id.toString(),
     sourceId: msg.sourceId ? msg.sourceId.toString() : null,
@@ -20,9 +20,9 @@ export function formatMessageDTO(msg: IMessage): MessageDTO {
     mediaGroupId: msg.mediaGroupId || null,
     messageType: msg.messageType,
     content: {
-      text: msg.content.text || '',
-      entities: msg.content.entities || [],
-      mediaItems: (msg.content.mediaItems || []).map((item) => ({
+      text: msg.content?.text || '',
+      entities: msg.content?.entities || [],
+      mediaItems: (msg.content?.mediaItems || []).map((item: any) => ({
         mediaType: item.mediaType,
         fileId: item.fileId,
         fileUniqueId: item.fileUniqueId,
@@ -35,25 +35,25 @@ export function formatMessageDTO(msg: IMessage): MessageDTO {
         fileName: item.fileName,
         mimeType: item.mimeType,
       })),
-      mediaGroupId: msg.content.mediaGroupId || null,
+      mediaGroupId: msg.content?.mediaGroupId || null,
     },
     status: msg.status,
     deliverySummary: {
-      targetCount: msg.deliverySummary.targetCount || 0,
-      successfulDestinationIds: (msg.deliverySummary.successfulDestinationIds || []).map((id) =>
+      targetCount: msg.deliverySummary?.targetCount || 0,
+      successfulDestinationIds: (msg.deliverySummary?.successfulDestinationIds || []).map((id: any) =>
         id.toString()
       ),
-      failedDestinationIds: (msg.deliverySummary.failedDestinationIds || []).map((id) =>
+      failedDestinationIds: (msg.deliverySummary?.failedDestinationIds || []).map((id: any) =>
         id.toString()
       ),
-      lastAttemptedAt: msg.deliverySummary.lastAttemptedAt
+      lastAttemptedAt: msg.deliverySummary?.lastAttemptedAt
         ? new Date(msg.deliverySummary.lastAttemptedAt).toISOString()
         : null,
     },
     isEditedAtSource: msg.isEditedAtSource,
-    sourceEditedAt: msg.sourceEditedAt ? msg.sourceEditedAt.toISOString() : null,
-    createdAt: msg.createdAt.toISOString(),
-    updatedAt: msg.updatedAt.toISOString(),
+    sourceEditedAt: msg.sourceEditedAt ? new Date(msg.sourceEditedAt).toISOString() : null,
+    createdAt: new Date(msg.createdAt).toISOString(),
+    updatedAt: new Date(msg.updatedAt).toISOString(),
   };
 }
 
@@ -76,7 +76,7 @@ export class PostService {
 
     const [total, messages] = await Promise.all([
       Message.countDocuments(filter),
-      Message.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Message.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     ]);
 
     return {

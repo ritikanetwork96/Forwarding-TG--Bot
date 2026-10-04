@@ -9,13 +9,13 @@ import {
 } from '@telegram-forwarder/shared';
 import { Types } from 'mongoose';
 
-export function formatLogDTO(log: IPublishLog, message?: IMessage | null): PublishLogDTO {
+export function formatLogDTO(log: any, message?: any): PublishLogDTO {
   return {
     _id: log._id.toString(),
-    messageId: log.messageId.toString(),
+    messageId: log.messageId ? log.messageId.toString() : '',
     sourceId: log.sourceId ? log.sourceId.toString() : null,
     categoryId: log.categoryId ? log.categoryId.toString() : null,
-    destinationId: log.destinationId.toString(),
+    destinationId: log.destinationId ? log.destinationId.toString() : '',
     ruleId: log.ruleId ? log.ruleId.toString() : null,
     triggeredBy: log.triggeredBy ? log.triggeredBy.toString() : null,
     publishMode: log.publishMode,
@@ -30,7 +30,7 @@ export function formatLogDTO(log: IPublishLog, message?: IMessage | null): Publi
         }
       : null,
     executionTimeMs: log.executionTimeMs,
-    createdAt: log.createdAt.toISOString(),
+    createdAt: new Date(log.createdAt).toISOString(),
     message: message ? formatMessageDTO(message) : null,
   };
 }
@@ -67,19 +67,19 @@ export class LogService {
 
     const [total, logs] = await Promise.all([
       PublishLog.countDocuments(filter),
-      PublishLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      PublishLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     ]);
 
     // Populate messages for logs
-    const messageIds = logs.map((l) => l.messageId);
-    const messages = await Message.find({ _id: { $in: messageIds } });
-    const messageMap = new Map<string, IMessage>();
+    const messageIds = logs.map((l: any) => l.messageId);
+    const messages = await Message.find({ _id: { $in: messageIds } }).lean();
+    const messageMap = new Map<string, any>();
     for (const m of messages) {
       messageMap.set(m._id.toString(), m);
     }
 
     return {
-      logs: logs.map((doc) =>
+      logs: logs.map((doc: any) =>
         formatLogDTO(doc, messageMap.get(doc.messageId.toString()) || null)
       ),
       meta: {

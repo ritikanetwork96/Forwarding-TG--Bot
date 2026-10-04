@@ -8,20 +8,20 @@ import {
 } from '@telegram-forwarder/shared';
 import { Types } from 'mongoose';
 
-export function formatRuleDTO(rule: IForwardingRule): ForwardingRuleDTO {
+export function formatRuleDTO(rule: any): ForwardingRuleDTO {
   return {
     _id: rule._id.toString(),
     name: rule.name,
     sourceId: rule.sourceId ? rule.sourceId.toString() : '',
     categoryId: rule.categoryId ? rule.categoryId.toString() : null,
-    destinationIds: (rule.destinationIds || []).map((id) => id.toString()),
-    destinationGroupIds: (rule.destinationGroupIds || []).map((id) => id.toString()),
+    destinationIds: (rule.destinationIds || []).map((id: any) => id.toString()),
+    destinationGroupIds: (rule.destinationGroupIds || []).map((id: any) => id.toString()),
     publishMode: rule.publishMode,
     workflowType: rule.workflowType,
     isActive: rule.isActive,
     priority: rule.priority,
-    createdAt: rule.createdAt.toISOString(),
-    updatedAt: rule.updatedAt.toISOString(),
+    createdAt: new Date(rule.createdAt).toISOString(),
+    updatedAt: new Date(rule.updatedAt).toISOString(),
   };
 }
 
@@ -35,7 +35,7 @@ export class RuleService {
     }
     if (query.isActive !== undefined) filter.isActive = query.isActive;
 
-    const rules = await ForwardingRule.find(filter).sort({ priority: -1, createdAt: -1 });
+    const rules = await ForwardingRule.find(filter).sort({ priority: -1, createdAt: -1 }).lean();
     return rules.map(formatRuleDTO);
   }
 

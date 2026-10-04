@@ -12,7 +12,7 @@ import {
 } from '@telegram-forwarder/shared';
 import { logger } from '../utils/logger.js';
 
-export function formatDestinationDTO(dest: IDestination): DestinationDTO {
+export function formatDestinationDTO(dest: any): DestinationDTO {
   return {
     _id: dest._id.toString(),
     telegramChatId: dest.telegramChatId,
@@ -24,27 +24,27 @@ export function formatDestinationDTO(dest: IDestination): DestinationDTO {
     type: dest.type,
     status: dest.status,
     verification: {
-      chatType: dest.verification.chatType,
-      isForum: dest.verification.isForum,
-      botRole: dest.verification.botRole,
-      isMember: dest.verification.isMember,
-      canPublish: dest.verification.canPublish,
-      canSendAsChat: dest.verification.canSendAsChat,
-      senderIdentity: dest.verification.senderIdentity,
+      chatType: dest.verification?.chatType,
+      isForum: dest.verification?.isForum,
+      botRole: dest.verification?.botRole,
+      isMember: dest.verification?.isMember,
+      canPublish: dest.verification?.canPublish,
+      canSendAsChat: dest.verification?.canSendAsChat,
+      senderIdentity: dest.verification?.senderIdentity,
       rights: {
-        canPostMessages: dest.verification.rights.canPostMessages,
-        canSendMessages: dest.verification.rights.canSendMessages,
-        canEditMessages: dest.verification.rights.canEditMessages,
-        canDeleteMessages: dest.verification.rights.canDeleteMessages,
-        canManageTopics: dest.verification.rights.canManageTopics,
+        canPostMessages: dest.verification?.rights?.canPostMessages,
+        canSendMessages: dest.verification?.rights?.canSendMessages,
+        canEditMessages: dest.verification?.rights?.canEditMessages,
+        canDeleteMessages: dest.verification?.rights?.canDeleteMessages,
+        canManageTopics: dest.verification?.rights?.canManageTopics,
       },
-      lastCheckedAt: dest.verification.lastCheckedAt
+      lastCheckedAt: dest.verification?.lastCheckedAt
         ? new Date(dest.verification.lastCheckedAt).toISOString()
         : null,
-      failureReason: dest.verification.failureReason,
+      failureReason: dest.verification?.failureReason,
     },
-    createdAt: dest.createdAt.toISOString(),
-    updatedAt: dest.updatedAt.toISOString(),
+    createdAt: new Date(dest.createdAt).toISOString(),
+    updatedAt: new Date(dest.updatedAt).toISOString(),
   };
 }
 
@@ -55,7 +55,7 @@ export class DestinationService {
       filter.status = query.status;
     }
 
-    const destinations = await Destination.find(filter).sort({ createdAt: -1 });
+    const destinations = await Destination.find(filter).sort({ createdAt: -1 }).lean();
     return destinations.map(formatDestinationDTO);
   }
 

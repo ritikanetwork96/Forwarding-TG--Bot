@@ -3,7 +3,7 @@ import { Category, type ICategory } from '../models/category.model.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import { ErrorCodes, type CategoryDTO, type CategoryStatus } from '@telegram-forwarder/shared';
 
-export function formatCategoryDTO(cat: ICategory): CategoryDTO {
+export function formatCategoryDTO(cat: any): CategoryDTO {
   return {
     _id: cat._id.toString(),
     name: cat.name,
@@ -13,11 +13,11 @@ export function formatCategoryDTO(cat: ICategory): CategoryDTO {
     slug: cat.slug,
     description: cat.description,
     icon: cat.icon,
-    destinationIds: cat.destinationIds?.map((id) => id.toString()) || [],
+    destinationIds: cat.destinationIds?.map((id: any) => id.toString()) || [],
     status: cat.status,
-    deletedAt: cat.deletedAt ? cat.deletedAt.toISOString() : null,
-    createdAt: cat.createdAt.toISOString(),
-    updatedAt: cat.updatedAt.toISOString(),
+    deletedAt: cat.deletedAt ? new Date(cat.deletedAt).toISOString() : null,
+    createdAt: new Date(cat.createdAt).toISOString(),
+    updatedAt: new Date(cat.updatedAt).toISOString(),
   };
 }
 
@@ -36,7 +36,7 @@ export class CategoryService {
       filter.status = { $ne: 'deleted' };
     }
 
-    const categories = await Category.find(filter).sort({ name: 1 });
+    const categories = await Category.find(filter).sort({ name: 1 }).lean();
     return categories.map(formatCategoryDTO);
   }
 

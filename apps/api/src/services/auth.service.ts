@@ -6,7 +6,7 @@ import { env } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { getTelegramBot, isBotConfigured } from '../telegram/bot.js';
 
-export function formatUserDTO(user: IUser): UserDTO {
+export function formatUserDTO(user: any): UserDTO {
   return {
     _id: user._id.toString(),
     email: user.email,
@@ -18,9 +18,9 @@ export function formatUserDTO(user: IUser): UserDTO {
     canManageAdmins: user.role === 'owner' || Boolean(user.canManageAdmins),
     tokenVersion: user.tokenVersion,
     telegramUserId: user.telegramUserId || null,
-    lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
-    createdAt: user.createdAt.toISOString(),
-    updatedAt: user.updatedAt.toISOString(),
+    lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null,
+    createdAt: new Date(user.createdAt).toISOString(),
+    updatedAt: new Date(user.updatedAt).toISOString(),
   };
 }
 

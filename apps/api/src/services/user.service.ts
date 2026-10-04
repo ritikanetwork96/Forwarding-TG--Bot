@@ -9,7 +9,7 @@ export class UserService {
    * List all registered users / administrators
    */
   public static async list(): Promise<UserDTO[]> {
-    const users = await User.find().sort({ role: -1, createdAt: 1 });
+    const users = await User.find().sort({ role: -1, createdAt: 1 }).lean();
     return users.map(formatUserDTO);
   }
 
