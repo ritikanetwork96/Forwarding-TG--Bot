@@ -16,7 +16,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@telegram-forwarder/shared": ["../../packages/shared/src/index.ts"]
     }
   },
   "include": ["src"],
