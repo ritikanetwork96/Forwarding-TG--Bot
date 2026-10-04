@@ -1,0 +1,35 @@
+{
+  "name": "telegram-forwarder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready Telegram Content Forwarding & Publishing Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"api,web\" -c \"blue,cyan\" \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm run dev -w @telegram-forwarder/api",
+    "dev:web": "npm run dev -w @telegram-forwarder/web",
+    "build": "npm run build -w @telegram-forwarder/shared && npm run build -w @telegram-forwarder/api && npm run build -w @telegram-forwarder/web",
+    "build:shared": "npm run build -w @telegram-forwarder/shared",
+    "build:api": "npm run build -w @telegram-forwarder/api",
+    "build:web": "npm run build -w @telegram-forwarder/web",
+    "type-check": "npm run type-check -w @telegram-forwarder/shared && npm run type-check -w @telegram-forwarder/api && npm run type-check -w @telegram-forwarder/web",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,js,cjs,mjs}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md,js,cjs,mjs}\"",
+    "test": "npm run test -w @telegram-forwarder/api && npm run test -w @telegram-forwarder/web",
+    "test:api": "npm run test -w @telegram-forwarder/api",
+    "test:web": "npm run test -w @telegram-forwarder/web"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}

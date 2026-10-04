@@ -1,0 +1,63 @@
+services:
+  # MongoDB Service (Optional local container for development)
+  mongodb:
+    image: mongo:7.0
+    container_name: telegram_forwarder_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: telegram_forwarder
+    volumes:
+      - mongodb_data:/data/db
+
+  # Backend REST API Service
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: telegram_forwarder_api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/telegram_forwarder
+      - REDIS_URL=redis://redis:6379
+      - FRONTEND_URL=http://localhost:5173
+      - LOG_LEVEL=info
+    depends_on:
+      - mongodb
+      - redis
+
+  # Redis Service (BullMQ queue & worker state)
+  redis:
+    image: redis:7-alpine
+    container_name: telegram_forwarder_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Frontend Web Service
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    container_name: telegram_forwarder_web
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    depends_on:
+      - api
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+

@@ -1,0 +1,363 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ============================================================
+       MATTE STEALTH GRAPHITE & TELEGRAM ENGINE — SYSTEM DESIGN TOKENS
+       Inspired by Linear, Raycast, and Precision Developer Consoles
+       ============================================================ */
+    --canvas-bg: #08090d;
+    --sidebar-bg: #0b0d14;
+    --surface-base: #0e1017;
+    --surface-elevated: #131722;
+    --surface-modal: #10131d;
+
+    /* Structural & Hairline Borders */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(14, 165, 233, 0.55);
+    --border-hover: rgba(255, 255, 255, 0.16);
+
+    /* Brand & Functional Accents */
+    --primary-brand: #0ea5e9;
+    --primary-brand-hover: #38bdf8;
+    --primary-brand-active: #0284c7;
+    --primary-glow: rgba(14, 165, 233, 0.15);
+
+    /* Typography Hierarchy */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Semantic Status Indicators */
+    --status-success: #10b981;
+    --status-warning: #f59e0b;
+    --status-danger: #f43f5e;
+    --status-info: #0ea5e9;
+
+    /* Backward Compatibility Aliases */
+    --bg-canvas: var(--canvas-bg);
+    --bg-surface: var(--surface-base);
+    --bg-surface-elevated: var(--surface-elevated);
+    --bg-surface-hover: var(--surface-elevated);
+
+    /* Standardized Radii */
+    --radius-badge: 9999px;
+    --radius-input: 8px;
+    --radius-button: 8px;
+    --radius-card: 14px;
+    --radius-modal: 16px;
+
+    /* Clean Crisp Shadows */
+    --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.6), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    --shadow-popover: 0 10px 28px -4px rgba(0, 0, 0, 0.75), 0 3px 8px -2px rgba(0, 0, 0, 0.6);
+    --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.9);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      'SF Pro Display',
+      'SF Pro Text',
+      'Inter',
+      system-ui,
+      sans-serif;
+    background-color: var(--canvas-bg);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Universal Subtle Minimalist Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  :focus-visible {
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ============================================================
+     TYPOGRAPHY HIERARCHY
+     ============================================================ */
+  .font-display {
+    font-size: 1.35rem;
+    line-height: 1.85rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+  }
+
+  .font-h1 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .font-h2 {
+    font-size: 0.95rem;
+    line-height: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+
+  .font-h3 {
+    font-size: 0.85rem;
+    line-height: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .font-body {
+    font-size: 0.8125rem;
+    line-height: 1.15rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  .font-caption {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .font-data-mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  /* ============================================================
+     SURFACES & ELEVATION
+     ============================================================ */
+  .depth-flat {
+    background-color: var(--surface-base);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .depth-card {
+    background-color: var(--surface-base);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--shadow-card);
+  }
+
+  .depth-popover {
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .depth-modal {
+    background-color: var(--surface-modal);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-modal);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .glass-panel {
+    background: rgba(14, 16, 23, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-default);
+  }
+
+  .glass-panel-elevated {
+    background: rgba(19, 23, 34, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .glass-panel-hover {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .glass-panel-hover:hover {
+    background: rgba(22, 27, 40, 0.95);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: var(--shadow-card);
+  }
+
+  .glass-card {
+    background: rgba(15, 18, 28, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-card-hover {
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-hover:hover {
+    background: rgba(22, 27, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-btn-primary {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(2, 132, 199, 0.35) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transition: all 180ms ease;
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.38) 0%, rgba(2, 132, 199, 0.5) 100%);
+    border-color: rgba(56, 189, 248, 0.7);
+    box-shadow: 0 0 28px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* ============================================================
+     APPLE HIG GLASS & MODAL SYSTEM
+     ============================================================ */
+  body.modal-open,
+  html.modal-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .apple-glass {
+    background: rgba(14, 18, 30, 0.88);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .apple-glass-card {
+    background: rgba(13, 17, 28, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apple-close-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: all 150ms ease;
+  }
+
+  .apple-close-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .apple-close-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* ============================================================
+     INTERACTION FOUNDATION
+     ============================================================ */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090d];
+  }
+
+  .press-scale {
+    @apply active:scale-[0.98] transition-transform duration-100 ease-out;
+  }
+
+  .interactive-hover {
+    @apply transition-all duration-150 ease-out hover:border-white/[0.18] hover:bg-[#131722];
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-400;
+  }
+
+  .text-gradient-subtle {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400;
+  }
+
+  /* ============================================================
+     MOBILE & SAFE AREA ERGONOMICS (APPLE iOS HIG)
+     ============================================================ */
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
+  }
+
+  .safe-area-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+}

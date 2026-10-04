@@ -1,0 +1,24 @@
+{
+  "name": "@telegram-forwarder/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared types and utilities for telegram-forwarder",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@telegram-forwarder/config": "*",
+    "typescript": "^5.7.3"
+  }
+}
