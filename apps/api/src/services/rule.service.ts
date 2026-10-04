@@ -1,4 +1,4 @@
-import { ForwardingRule, type IForwardingRule } from '../models/forwarding-rule.model.js';
+import { ForwardingRule } from '../models/forwarding-rule.model.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
 import {
   type ForwardingRuleDTO,

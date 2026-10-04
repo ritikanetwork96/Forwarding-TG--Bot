@@ -1,4 +1,4 @@
-import { Destination, type IDestination } from '../models/destination.model.js';
+import { Destination } from '../models/destination.model.js';
 import { DestinationGroup } from '../models/destination-group.model.js';
 import { ForwardingRule } from '../models/forwarding-rule.model.js';
 import { TelegramService } from '../telegram/telegram.service.js';

@@ -102,7 +102,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <div className="min-h-screen bg-[#08090d] text-slate-100 flex flex-col font-sans antialiased selection:bg-sky-500/25 selection:text-sky-300">
       {/* Top Stealth Navigation Bar with Glass Effect */}
-      <header className="sticky top-0 z-40 w-full bg-[#08090d]/85 backdrop-blur-xl border-b border-white/[0.08] px-3 sm:px-6 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+      <header className="admin-sticky-header sticky top-0 z-40 w-full bg-[#08090d]/85 backdrop-blur-xl border-b border-white/[0.08] px-3 sm:px-6 shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 h-14">
           {/* Left: Mobile Menu Trigger + Brand Identity + Desktop Tabs */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
@@ -490,12 +490,12 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
       )}
 
       {/* Main Viewport Container */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-28 lg:pb-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-[var(--mobile-bottom-nav-clearance)] lg:pb-8">
         {children}
       </main>
 
       {/* Fixed Mobile Bottom Navigation Bar with Glass Effect */}
-      <nav className="fixed bottom-0 inset-x-0 z-30 lg:hidden bg-[#090c15]/85 backdrop-blur-xl border-t border-white/[0.1] px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.6)] safe-area-bottom">
+      <nav className="admin-mobile-bottom-nav fixed bottom-0 inset-x-0 z-30 lg:hidden bg-[#090c15]/85 backdrop-blur-xl border-t border-white/[0.1] px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.6)] safe-area-bottom">
         {/* 1. Dashboard */}
         <NavLink
           to="/"

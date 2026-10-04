@@ -54,6 +54,8 @@
     --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.6), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
     --shadow-popover: 0 10px 28px -4px rgba(0, 0, 0, 0.75), 0 3px 8px -2px rgba(0, 0, 0, 0.6);
     --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.9);
+
+    --mobile-bottom-nav-clearance: calc(6.25rem + env(safe-area-inset-bottom, 0px));
   }
 
   html {
@@ -272,6 +274,34 @@
     overflow: hidden !important;
     touch-action: none !important;
     overscroll-behavior: contain !important;
+  }
+
+  /* Full-screen composer: hide app chrome so only the studio is visible */
+  @media (max-width: 1023px) {
+    body.modal-open .admin-mobile-bottom-nav,
+    body.modal-open .admin-sticky-header {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .publishing-studio-shell {
+      background: #08090d;
+      border: none;
+      box-shadow: none;
+    }
+
+    .publishing-studio-shell .studio-mobile-segment [data-active='true'] {
+      background: rgba(14, 165, 233, 0.18);
+      color: #e0f2fe;
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.35);
+    }
+
+    .publishing-studio-shell .studio-mode-toggle [data-active='true'] {
+      background: rgba(14, 165, 233, 0.22);
+      color: #f0f9ff;
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.3);
+    }
   }
 
   .apple-glass {

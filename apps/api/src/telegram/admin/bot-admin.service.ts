@@ -1914,7 +1914,7 @@ export class BotAdminService {
 
       if (action === 'edest') {
         await ctx.answerCallbackQuery();
-        let ruleDestFilter: any = {
+        const ruleDestFilter: any = {
           status: 'active',
           'verification.canPublish': true,
         };
@@ -1944,7 +1944,7 @@ export class BotAdminService {
           await rule.save();
           await ctx.answerCallbackQuery();
 
-          let ruleDestFilter: any = {
+          const ruleDestFilter: any = {
             status: 'active',
             'verification.canPublish': true,
           };

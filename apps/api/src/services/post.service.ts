@@ -1,4 +1,4 @@
-import { Message, type IMessage } from '../models/message.model.js';
+import { Message } from '../models/message.model.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
 import {
   ErrorCodes,

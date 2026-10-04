@@ -1,5 +1,5 @@
-import { PublishLog, type IPublishLog } from '../models/publish-log.model.js';
-import { Message, type IMessage } from '../models/message.model.js';
+import { PublishLog } from '../models/publish-log.model.js';
+import { Message } from '../models/message.model.js';
 import { formatMessageDTO } from './post.service.js';
 import { NotFoundError } from '../utils/errors.js';
 import {

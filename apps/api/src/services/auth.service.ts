@@ -1,4 +1,4 @@
-import { User, type IUser } from '../models/user.model.js';
+import { User } from '../models/user.model.js';
 import { hashPassword, comparePassword, generateToken } from '../utils/crypto.js';
 import { AuthenticationError, ConflictError, BadRequestError, AppError } from '../utils/errors.js';
 import { ErrorCodes, type AuthSessionData, type UserDTO } from '@telegram-forwarder/shared';

@@ -1,4 +1,4 @@
-import { Source, type ISource } from '../models/source.model.js';
+import { Source } from '../models/source.model.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import {
   ErrorCodes,

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Category, type ICategory } from '../models/category.model.js';
+import { Category } from '../models/category.model.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import { ErrorCodes, type CategoryDTO, type CategoryStatus } from '@telegram-forwarder/shared';
 

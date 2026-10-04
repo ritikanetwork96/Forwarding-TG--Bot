@@ -457,29 +457,29 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200 flex flex-col items-center justify-start sm:justify-center"
+      className="fixed inset-0 z-[100] overflow-hidden sm:overflow-y-auto overflow-x-hidden p-0 sm:p-4 md:p-6 bg-[#07080c] sm:bg-black/85 backdrop-blur-xl animate-in fade-in duration-200 flex flex-col items-stretch sm:items-center justify-start sm:justify-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleRequestClose();
       }}
     >
-      <div className="relative w-full max-w-7xl max-h-[92vh] sm:max-h-[90vh] my-auto flex flex-col apple-glass rounded-2xl sm:rounded-3xl shadow-2xl shadow-black/90 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.25] before:to-transparent shrink-0">
-        {/* Apple Mobile Sheet Grab Handle */}
-        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-0.5 sm:hidden shrink-0" />
-
+      <div className="publishing-studio-shell relative w-full max-w-7xl min-h-0 flex-1 sm:flex-none sm:flex-initial max-h-[100dvh] sm:max-h-[90vh] sm:my-auto flex flex-col apple-glass rounded-none sm:rounded-3xl shadow-2xl shadow-black/90 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.25] before:to-transparent shrink-0">
         {/* Studio Top Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/[0.08] bg-[#090e1a] shrink-0">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 border-b border-white/[0.08] bg-[#090e1a]/95 backdrop-blur-md shrink-0 safe-area-top">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 shrink-0">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="hidden sm:flex w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 items-center justify-center text-white shadow-lg shadow-sky-500/20 shrink-0">
+              <Sparkles className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2 font-display">
+                <h2 className="text-[15px] sm:text-base font-bold text-slate-100 flex items-center gap-2 font-display tracking-tight">
                   <span>Publishing Studio</span>
                   <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full uppercase tracking-wider">
                     {initialPost ? (isAlreadyPublished ? 'Re-send / Forward' : 'Edit Post') : 'Composer'}
                   </span>
                 </h2>
+                <span className="sm:hidden px-2 py-0.5 text-[10px] font-semibold bg-white/[0.06] text-sky-300/90 border border-white/[0.1] rounded-full uppercase tracking-wide">
+                  {initialPost ? (isAlreadyPublished ? 'Re-send' : 'Edit') : 'New post'}
+                </span>
 
                 {/* Draft / Autosave Status Indicator */}
                 {!initialPost && (
@@ -511,53 +511,54 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Apple style Cancel Button */}
             <button
               type="button"
               onClick={handleRequestClose}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] transition-all"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] transition-all"
             >
               Cancel
             </button>
 
-            {/* Apple Circular Close Button */}
             <button
               type="button"
               onClick={handleRequestClose}
               title="Close Publishing Studio (Esc)"
-              className="apple-close-btn"
+              className="apple-close-btn sm:ml-0"
+              aria-label="Close"
             >
               <X className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
 
-        {/* Mobile Full-Width iOS Segmented Control Bar */}
-        <div className="md:hidden px-4 py-2 border-b border-white/[0.08] bg-[#080d1a] shrink-0">
-          <div className="flex bg-black/50 p-1 rounded-xl border border-white/[0.08]">
+        {/* Mobile tab switcher */}
+        <div className="md:hidden px-4 py-2.5 border-b border-white/[0.06] bg-[#080d1a]/80 shrink-0">
+          <div className="studio-mobile-segment flex bg-[#0a0f1a] p-1 rounded-xl border border-white/[0.06]">
             <button
               type="button"
+              data-active={activeMobileTab === 'editor' ? 'true' : 'false'}
               onClick={() => setActiveMobileTab('editor')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
                 activeMobileTab === 'editor'
-                  ? 'bg-sky-500 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-sky-500/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.35)] sm:bg-sky-500 sm:text-white sm:shadow-md'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               <Edit3 className="w-3.5 h-3.5" />
-              <span>Post Editor</span>
+              <span>Editor</span>
             </button>
             <button
               type="button"
+              data-active={activeMobileTab === 'preview' ? 'true' : 'false'}
               onClick={() => setActiveMobileTab('preview')}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
                 activeMobileTab === 'preview'
-                  ? 'bg-sky-500 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-sky-500/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.35)] sm:bg-sky-500 sm:text-white sm:shadow-md'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>Telegram Preview</span>
+              <span>Preview</span>
             </button>
           </div>
         </div>
@@ -600,12 +601,48 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Left Pane: Creative Editor (55% on desktop) */}
           <div
-            className={`flex-1 md:w-[55%] flex flex-col overflow-y-auto p-4 sm:p-6 space-y-5 border-r border-white/[0.08] bg-[#090e1a]/50 ${
+            className={`flex-1 md:w-[55%] flex flex-col overflow-y-auto overscroll-contain p-4 sm:p-6 pb-28 sm:pb-8 gap-6 sm:gap-5 border-r border-white/[0.08] bg-[#090e1a]/50 scroll-pb-6 ${
               activeMobileTab === 'preview' ? 'hidden md:flex' : 'flex'
             }`}
           >
+            {/* Row 2: Rich HTML Formatting Textarea (first on mobile) */}
+            <div
+              className={`order-1 md:order-2 flex flex-col relative rounded-2xl border bg-[#0a0f18] overflow-hidden shadow-inner transition-all ${
+                isOverLimit
+                  ? 'border-rose-500 ring-1 ring-rose-500'
+                  : 'border-white/[0.08] focus-within:ring-1 focus-within:ring-sky-500/50 focus-within:border-sky-500/40'
+              }`}
+            >
+              <RichFormatToolbar textareaRef={textareaRef} text={postText} setText={setPostText} />
+              <textarea
+                ref={textareaRef}
+                value={postText}
+                onChange={(e) => setPostText(e.target.value)}
+                placeholder="Write your Telegram message or media caption here..."
+                rows={5}
+                className="w-full p-3.5 text-sm text-slate-100 bg-transparent placeholder-slate-500 focus:outline-none resize-y min-h-[120px] sm:min-h-[140px] leading-relaxed font-sans"
+              />
+
+              <div className="flex items-center justify-between px-3.5 py-2 border-t border-white/[0.06] bg-[#0d1526]/80 text-[11px]">
+                <span className="text-slate-500">
+                  {mediaItems.length > 0 ? 'Caption · max 1,024' : 'Text · max 4,096'}
+                </span>
+                <span
+                  className={`font-mono font-medium ${
+                    isOverLimit
+                      ? 'text-rose-400 font-bold'
+                      : currentLength > maxCharacters * 0.85
+                        ? 'text-amber-400'
+                        : 'text-slate-400'
+                  }`}
+                >
+                  {currentLength} / {maxCharacters}
+                </span>
+              </div>
+            </div>
+
             {/* Row 1: Mode & Category Config */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <div className="order-2 md:order-1 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3 items-end rounded-2xl sm:rounded-none border border-white/[0.06] sm:border-0 bg-[#0a0f18]/60 sm:bg-transparent p-3.5 sm:p-0">
               {/* Category Selector */}
               <div>
                 <CategorySelector
@@ -619,77 +656,40 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Publish Mode
                 </label>
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#090e1a] border border-white/[0.08] rounded-xl shadow-inner">
+                <div className="studio-mode-toggle grid grid-cols-2 gap-1.5 p-1 bg-[#070b14] border border-white/[0.06] rounded-xl">
                   <button
                     type="button"
+                    data-active={publishMode === 'copy' ? 'true' : 'false'}
                     onClick={() => setPublishMode('copy')}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    className={`flex items-center justify-center gap-1.5 py-2 sm:py-1.5 text-xs font-medium rounded-lg transition-all ${
                       publishMode === 'copy'
-                        ? 'bg-sky-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-sky-500/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.3)] sm:bg-sky-600 sm:text-white sm:shadow-sm'
+                        : 'text-slate-500 hover:text-slate-300 sm:text-slate-400 sm:hover:text-slate-200'
                     }`}
                   >
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Mode</span>
+                    <span>Copy</span>
                   </button>
                   <button
                     type="button"
+                    data-active={publishMode === 'forward' ? 'true' : 'false'}
                     onClick={() => setPublishMode('forward')}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    className={`flex items-center justify-center gap-1.5 py-2 sm:py-1.5 text-xs font-medium rounded-lg transition-all ${
                       publishMode === 'forward'
-                        ? 'bg-sky-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-sky-500/20 text-sky-100 shadow-[inset_0_0_0_1px_rgba(56,189,248,0.3)] sm:bg-sky-600 sm:text-white sm:shadow-sm'
+                        : 'text-slate-500 hover:text-slate-300 sm:text-slate-400 sm:hover:text-slate-200'
                     }`}
                   >
                     <Share2 className="w-3.5 h-3.5" />
-                    <span>Forward Mode</span>
+                    <span>Forward</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Row 2: Rich HTML Formatting Textarea */}
-            <div
-              className={`flex flex-col relative rounded-xl border bg-[#090e1a] overflow-hidden shadow-inner transition-all ${
-                isOverLimit
-                  ? 'border-rose-500 ring-1 ring-rose-500'
-                  : 'border-white/[0.10] focus-within:ring-1 focus-within:ring-sky-500 focus-within:border-sky-500'
-              }`}
-            >
-              <RichFormatToolbar textareaRef={textareaRef} text={postText} setText={setPostText} />
-              <textarea
-                ref={textareaRef}
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                placeholder="Write your Telegram message or media caption here... HTML tags like <b>, <i>, <code>, <tg-spoiler> are fully supported."
-                rows={6}
-                className="w-full p-3.5 text-xs sm:text-sm text-slate-100 bg-transparent placeholder-slate-500 focus:outline-none resize-y min-h-[140px] leading-relaxed font-sans"
-              />
-
-              {/* Character Limit and Counter Guidance Bar */}
-              <div className="flex items-center justify-between px-3.5 py-2 border-t border-white/[0.06] bg-[#0d1526]/80 text-[11px]">
-                <span className="text-slate-400">
-                  {mediaItems.length > 0
-                    ? 'Media Caption Mode (Max 1,024)'
-                    : 'Direct Text Post (Max 4,096)'}
-                </span>
-                <span
-                  className={`font-mono font-medium ${
-                    isOverLimit
-                      ? 'text-rose-400 font-bold'
-                      : currentLength > maxCharacters * 0.85
-                        ? 'text-amber-400'
-                        : 'text-slate-400'
-                  }`}
-                >
-                  {currentLength} / {maxCharacters} chars
-                </span>
-              </div>
-            </div>
-
             {/* Character Limit Exceeded Guidance */}
             {isOverLimit && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
+              <div className="order-2 md:order-3 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>
                   Post exceeds limit by {currentLength - maxCharacters} characters. Telegram{' '}
@@ -702,15 +702,15 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
             )}
 
             {/* Row 3: Real Media Uploader (Dropzone + Touch Picker) */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Attached Media &amp; Albums
+            <div className="order-3 md:order-4 rounded-2xl sm:rounded-none border border-white/[0.06] sm:border-0 bg-[#0a0f18]/60 sm:bg-transparent p-3.5 sm:p-0">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">
+                Media &amp; albums
               </label>
               <MediaDropzone items={mediaItems} setItems={setMediaItems} maxItems={10} />
             </div>
 
             {/* Row 4: Target Destination & Group Picker */}
-            <div>
+            <div className="order-4 md:order-5 rounded-2xl sm:rounded-none border border-white/[0.06] sm:border-0 bg-[#0a0f18]/60 sm:bg-transparent p-3.5 sm:p-0">
               <DestinationSelector
                 selectedDestinationIds={selectedDestIds}
                 selectedGroupIds={selectedGroupIds}
@@ -722,7 +722,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
             </div>
 
             {/* Row 5: Schedule Toggle */}
-            <div className="p-3.5 bg-[#090e1a] border border-white/[0.08] rounded-xl space-y-2.5 shadow-sm">
+            <div className="order-5 md:order-6 p-3.5 bg-[#0a0f18] border border-white/[0.06] rounded-2xl sm:rounded-xl sm:bg-[#090e1a] sm:border-white/[0.08] space-y-2.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-sky-400" />
@@ -772,7 +772,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
         </div>
 
         {/* Studio Bottom Action Bar */}
-        <div className="px-4 sm:px-6 py-3 sm:py-3.5 bg-[#090e1a] border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 shadow-lg safe-area-bottom sm:pb-3.5">
+        <div className="shrink-0 px-4 sm:px-6 py-3 sm:py-3.5 bg-[#090e1a]/95 backdrop-blur-xl border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 shadow-[0_-8px_32px_rgba(0,0,0,0.45)] safe-area-bottom sm:pb-3.5">
           <div className="text-xs text-slate-400 hidden sm:flex items-center gap-2">
             <span>Shortcut:</span>
             <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#111c33] border border-white/[0.10] rounded text-slate-300">
@@ -781,7 +781,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
             <span>to publish</span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleRequestClose}
@@ -796,7 +796,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
               disabled={
                 saveDraftMutation.isPending || (!postText.trim() && mediaItems.length === 0)
               }
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 text-xs font-semibold text-slate-200 hover:text-white bg-[#111c33] hover:bg-[#162544] rounded-xl border border-white/[0.10] transition-all disabled:opacity-50 shadow-sm whitespace-nowrap active:scale-[0.97]"
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-3 sm:py-2.5 text-xs font-semibold text-slate-200 hover:text-white bg-[#111c33] hover:bg-[#162544] rounded-xl border border-white/[0.10] transition-all disabled:opacity-50 shadow-sm whitespace-nowrap active:scale-[0.97]"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{saveDraftMutation.isPending ? 'Saving...' : 'Save Draft'}</span>
@@ -811,10 +811,10 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
                 selectedDestIds.length === 0 ||
                 (!postText.trim() && mediaItems.length === 0)
               }
-              className={`flex-[1.4] sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 text-xs font-bold text-white rounded-xl shadow-lg transition-all whitespace-nowrap active:scale-[0.97] ${
+              className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-2.5 text-xs font-bold text-white rounded-xl shadow-lg transition-all whitespace-nowrap active:scale-[0.97] ${
                 isScheduling
                   ? 'bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400 shadow-amber-500/20'
-                  : 'bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 shadow-sky-500/20'
+                  : 'bg-sky-600 hover:bg-sky-500 shadow-sky-500/25 sm:bg-gradient-to-r sm:from-sky-600 sm:to-indigo-600 sm:hover:from-sky-500 sm:hover:to-indigo-500 sm:shadow-sky-500/20'
               } disabled:opacity-50`}
             >
               {executePublishMutation.isPending ? (
@@ -852,9 +852,9 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowConfirmPublish(false);
           }}
-          className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-md apple-glass rounded-t-[28px] sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 border border-white/15 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6">
+          <div className="w-full max-w-md apple-glass rounded-t-[28px] sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 border border-white/15 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6">
             <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-2 sm:hidden shrink-0" />
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2 text-white font-bold text-sm">
@@ -940,9 +940,9 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowUnsavedPrompt(false);
           }}
-          className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
         >
-          <div className="w-full max-w-sm apple-glass rounded-t-[28px] sm:rounded-3xl shadow-2xl p-5 space-y-4 border border-white/15 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
+          <div className="w-full max-w-sm apple-glass rounded-t-[28px] sm:rounded-3xl shadow-2xl p-5 space-y-4 border border-white/15 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-5">
             <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-2 sm:hidden shrink-0" />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0">
