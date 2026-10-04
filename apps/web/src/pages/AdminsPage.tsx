@@ -6,7 +6,6 @@ import {
   UserPlus,
   Crown,
   Tag,
-  CheckCircle2,
   XCircle,
   Trash2,
   Edit2,
@@ -19,11 +18,6 @@ import {
   AtSign,
   Send,
   Sparkles,
-  Layers,
-  Lock,
-  UserCheck,
-  Smartphone,
-  RefreshCw,
 } from 'lucide-react';
 import { UserService, type CreateUserData, type UpdateUserData } from '../services/user.service';
 import { useAuth } from '../context/AuthContext';
