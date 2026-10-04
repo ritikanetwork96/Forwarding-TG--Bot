@@ -17,8 +17,10 @@
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
   },
-  "devDependencies": {
-    "@telegram-forwarder/config": "*",
+  "dependencies": {
     "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@telegram-forwarder/config": "*"
   }
 }
