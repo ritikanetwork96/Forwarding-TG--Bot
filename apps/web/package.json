@@ -6,7 +6,7 @@
   "description": "Frontend web application for telegram-forwarder",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build --prefix ../../packages/shared && tsc && vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "test": "vitest run"
