@@ -104,33 +104,7 @@ export const PostsPage: React.FC = () => {
     },
   });
 
-  const [resendingPostId, setResendingPostId] = useState<string | null>(null);
 
-  const resendPostMutation = useMutation({
-    mutationFn: (messageId: string) => PublishService.resendPost(messageId),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['logs'] });
-      setActionSuccess(
-        `Post re-dispatched to Telegram successfully! Delivered to ${result.successfulCount} channel(s).`
-      );
-      setTimeout(() => setActionSuccess(null), 4000);
-    },
-    onError: (err: unknown) => {
-      setActionError(err instanceof Error ? err.message : 'Re-send failed');
-      setTimeout(() => setActionError(null), 5000);
-    },
-    onSettled: () => {
-      setResendingPostId(null);
-    },
-  });
-
-  const handleResendPost = (id: string) => {
-    setActionError(null);
-    setActionSuccess(null);
-    setResendingPostId(id);
-    resendPostMutation.mutate(id);
-  };
 
   const getStatusBadge = (status: MessageStatus) => {
     switch (status) {
@@ -502,22 +476,48 @@ export const PostsPage: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap justify-end">
-                    {/* 1-Click Re-send / Forward Again for sent posts */}
-                    {(post.status === 'published' || post.status === 'partially_published') && (
+                    {/* Re-send / Forward Action for sent posts */}
+                    {post.status === 'published' || post.status === 'partially_published' ? (
                       <Button
                         variant="primary"
                         size="xs"
-                        onClick={() => handleResendPost(post._id)}
-                        disabled={resendingPostId === post._id}
-                        leftIcon={
-                          <Send
-                            className={cn('w-3.5 h-3.5', resendingPostId === post._id && 'animate-spin')}
-                          />
-                        }
-                        title="Re-send this message to channels again"
-                        className="flex-1 sm:flex-none whitespace-nowrap"
+                        onClick={() => {
+                          setStudioInitialPost(post);
+                          setIsStudioOpen(true);
+                        }}
+                        leftIcon={<Send className="w-3.5 h-3.5" />}
+                        title="Open in Publishing Studio to review previous channels and re-send or forward"
+                        className="flex-1 sm:flex-none whitespace-nowrap shadow-sm bg-sky-600 hover:bg-sky-500 text-white font-medium"
                       >
-                        <span>{resendingPostId === post._id ? 'Sending...' : 'Re-send Post'}</span>
+                        <span>Re-send / Forward</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant={post.status === 'pending_approval' ? 'primary' : 'secondary'}
+                        size="xs"
+                        onClick={() => {
+                          setStudioInitialPost(post);
+                          setIsStudioOpen(true);
+                        }}
+                        leftIcon={
+                          post.status === 'pending_approval' ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          ) : (
+                            <Edit3 className="w-3.5 h-3.5" />
+                          )
+                        }
+                        title="Open in Publishing Studio"
+                        className={cn(
+                          'flex-1 sm:flex-none whitespace-nowrap',
+                          post.status === 'pending_approval' &&
+                            'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20 text-white font-medium'
+                        )}
+                      >
+                        <span>
+                          {post.status === 'pending_approval'
+                            ? 'Review & Approve'
+                            : 'Open & Edit'}
+                        </span>
                       </Button>
                     )}
 
@@ -535,36 +535,6 @@ export const PostsPage: React.FC = () => {
                         </span>
                       </Button>
                     )}
-
-                    <Button
-                      variant={post.status === 'pending_approval' ? 'primary' : 'secondary'}
-                      size="xs"
-                      onClick={() => {
-                        setStudioInitialPost(post);
-                        setIsStudioOpen(true);
-                      }}
-                      leftIcon={
-                        post.status === 'pending_approval' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Edit3 className="w-3.5 h-3.5" />
-                        )
-                      }
-                      title="Open in Publishing Studio"
-                      className={cn(
-                        'flex-1 sm:flex-none whitespace-nowrap',
-                        post.status === 'pending_approval' &&
-                          'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20 text-white font-medium'
-                      )}
-                    >
-                      <span>
-                        {post.status === 'pending_approval'
-                          ? 'Review & Approve'
-                          : post.status === 'published'
-                          ? 'Edit & Re-forward'
-                          : 'Open & Edit'}
-                      </span>
-                    </Button>
                   </div>
                 </div>
               </Card>

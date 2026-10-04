@@ -95,7 +95,16 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
         })
       );
       setMediaItems(existingMedia);
-      setSelectedDestIds([]);
+
+      // Pre-populate previously targeted channels so user can see, uncheck or add new ones
+      const previousDests = Array.from(
+        new Set([
+          ...(initialPost.deliverySummary?.successfulDestinationIds || []),
+          ...(initialPost.deliverySummary?.failedDestinationIds || []),
+        ])
+      );
+      setSelectedDestIds(previousDests);
+      setSelectedGroupIds([]);
       setIsScheduling(false);
       setScheduleDateTime('');
       setSaveStatus('saved');
@@ -441,17 +450,17 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-3 md:p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200 flex flex-col items-center justify-start sm:justify-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleRequestClose();
       }}
     >
-      <div className="relative w-full max-w-7xl h-[95vh] sm:h-[94vh] flex flex-col apple-glass rounded-t-[28px] sm:rounded-3xl shadow-2xl shadow-black/90 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.25] before:to-transparent">
+      <div className="relative w-full max-w-7xl max-h-[92vh] sm:max-h-[90vh] my-auto flex flex-col apple-glass rounded-2xl sm:rounded-3xl shadow-2xl shadow-black/90 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.25] before:to-transparent shrink-0">
         {/* Apple Mobile Sheet Grab Handle */}
-        <div className="w-12 h-1.5 bg-white/30 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-0.5 sm:hidden shrink-0" />
 
         {/* Studio Top Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/[0.08] bg-[#090e1a]/95 shrink-0">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/[0.08] bg-[#090e1a] shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 shrink-0">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
