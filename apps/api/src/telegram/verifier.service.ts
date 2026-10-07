@@ -34,6 +34,38 @@ export class DestinationVerifierService {
         isForum,
       };
 
+      // If chat is a private user chat
+      if (chatType === 'private') {
+        const anyChat = chat as any;
+        const userTitle =
+          [anyChat.first_name, anyChat.last_name].filter(Boolean).join(' ') ||
+          metadata.title ||
+          `User ${chat.id}`;
+        metadata.title = userTitle;
+        return {
+          canPublish: true,
+          metadata,
+          verification: {
+            chatType: 'private',
+            isForum: false,
+            botRole: 'member',
+            isMember: true,
+            canPublish: true,
+            canSendAsChat: false,
+            senderIdentity: 'bot',
+            rights: {
+              canPostMessages: true,
+              canSendMessages: true,
+              canEditMessages: true,
+              canDeleteMessages: true,
+              canManageTopics: false,
+            },
+            lastCheckedAt: new Date().toISOString(),
+            failureReason: null,
+          },
+        };
+      }
+
       // 2. Fetch bot's membership status in the chat
       const member = await bot.api.getChatMember(telegramChatId, botInfo.id);
       const role = member.status as BotMemberRole;

@@ -1,9 +1,11 @@
 import { Destination } from '../models/destination.model.js';
 import { DestinationGroup } from '../models/destination-group.model.js';
 import { ForwardingRule } from '../models/forwarding-rule.model.js';
+import { Category } from '../models/category.model.js';
 import { TelegramService } from '../telegram/telegram.service.js';
 import { isTransientTelegramError } from '../telegram/normalizer.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
+import { Types } from 'mongoose';
 import {
   ErrorCodes,
   type DestinationDTO,
@@ -43,6 +45,8 @@ export function formatDestinationDTO(dest: any): DestinationDTO {
         : null,
       failureReason: dest.verification?.failureReason,
     },
+    categoryIds: [],
+    categories: [],
     createdAt: new Date(dest.createdAt).toISOString(),
     updatedAt: new Date(dest.updatedAt).toISOString(),
   };
@@ -56,7 +60,35 @@ export class DestinationService {
     }
 
     const destinations = await Destination.find(filter).sort({ createdAt: -1 }).lean();
-    return destinations.map(formatDestinationDTO);
+    const categories = await Category.find({ status: { $ne: 'deleted' } }).lean();
+
+    // Map destinationId -> Category[]
+    const destCatMap = new Map<
+      string,
+      Array<{ _id: string; name: string; displayName?: string | null; iconEmoji?: string }>
+    >();
+    for (const cat of categories) {
+      for (const dId of cat.destinationIds || []) {
+        const idStr = dId.toString();
+        if (!destCatMap.has(idStr)) {
+          destCatMap.set(idStr, []);
+        }
+        destCatMap.get(idStr)!.push({
+          _id: cat._id.toString(),
+          name: cat.name,
+          displayName: cat.displayName || null,
+          iconEmoji: cat.iconEmoji || '📁',
+        });
+      }
+    }
+
+    return destinations.map((d) => {
+      const dto = formatDestinationDTO(d);
+      const catList = destCatMap.get(dto._id) || [];
+      dto.categories = catList;
+      dto.categoryIds = catList.map((c) => c._id);
+      return dto;
+    });
   }
 
   public static async getById(id: string): Promise<DestinationDTO> {
@@ -64,7 +96,41 @@ export class DestinationService {
     if (!destination) {
       throw new NotFoundError('Destination not found');
     }
-    return formatDestinationDTO(destination);
+    const dto = formatDestinationDTO(destination);
+    const categories = await Category.find({
+      destinationIds: destination._id,
+      status: { $ne: 'deleted' },
+    }).lean();
+    dto.categories = categories.map((c) => ({
+      _id: c._id.toString(),
+      name: c.name,
+      displayName: c.displayName || null,
+      iconEmoji: c.iconEmoji || '📁',
+    }));
+    dto.categoryIds = dto.categories.map((c) => c._id);
+    return dto;
+  }
+
+  public static async assignCategories(
+    destinationId: string,
+    categoryIds: string[]
+  ): Promise<void> {
+    const destObjId = new Types.ObjectId(destinationId);
+    const targetCatObjIds = categoryIds.map((cId) => new Types.ObjectId(cId));
+
+    // Remove destination from all categories not in the target list
+    await Category.updateMany(
+      { _id: { $nin: targetCatObjIds } },
+      { $pull: { destinationIds: destObjId } }
+    );
+
+    // Add destination to all categories in the target list
+    if (targetCatObjIds.length > 0) {
+      await Category.updateMany(
+        { _id: { $in: targetCatObjIds } },
+        { $addToSet: { destinationIds: destObjId } }
+      );
+    }
   }
 
   public static async create(data: {

@@ -527,51 +527,54 @@ export class IngestionService {
       message.categoryId
     );
 
+    // If no specific rule is matched, auto-forward to all active destinations by default (excluding source chat to prevent loops)
     if (resolvedTargets.length === 0) {
-      logger.debug(
-        `No matching active rules for message ${message._id} from source ${source.title}`
+      logger.info(
+        `No specific rule configured for source "${source.title}". Auto-forwarding to active destinations...`
       );
-      return message;
-    }
+      const fallbackDests = await Destination.find({
+        telegramChatId: { $ne: source.telegramChatId },
+        status: 'active',
+        'verification.canPublish': { $ne: false },
+      }).select('_id');
 
-    let hasManualApproval = false;
-
-    for (const target of resolvedTargets) {
-      if (target.workflowType === 'automatic') {
-        logger.info(
-          `Executing automatic publish for message ${message._id} via rule [${target.ruleName}]`
-        );
+      if (fallbackDests.length > 0) {
         try {
           await PublishService.publishAutomated({
             messageId: message._id.toString(),
-            destinationIds: target.destinationIds,
-            publishMode: target.publishMode,
-            ruleId: target.ruleId,
+            destinationIds: fallbackDests.map((d) => d._id.toString()),
+            publishMode: 'copy',
           });
-        } catch (pubErr) {
-          logger.error(
-            `Error during automatic publish for message ${message._id} via rule ${target.ruleId}:`,
-            pubErr
+          logger.info(
+            `Default auto-forward executed for message ${message._id} to ${fallbackDests.length} destinations.`
           );
+        } catch (pubErr) {
+          logger.error(`Error in default auto-forward for message ${message._id}:`, pubErr);
         }
-      } else if (target.workflowType === 'manual_approval') {
-        hasManualApproval = true;
+      }
+      return (await Message.findById(message._id)) || message;
+    }
+
+    for (const target of resolvedTargets) {
+      logger.info(
+        `Executing publish for message ${message._id} via rule [${target.ruleName}]`
+      );
+      try {
+        await PublishService.publishAutomated({
+          messageId: message._id.toString(),
+          destinationIds: target.destinationIds,
+          publishMode: target.publishMode,
+          ruleId: target.ruleId,
+        });
+      } catch (pubErr) {
+        logger.error(
+          `Error during automatic publish for message ${message._id} via rule ${target.ruleId}:`,
+          pubErr
+        );
       }
     }
 
-    // Refresh message to read any status changes made during automatic publishes
-    const refreshed = await Message.findById(message._id);
-    if (!refreshed) return message;
-
-    if (hasManualApproval) {
-      // If any matching rule requires manual approval, mark as pending_approval
-      if (refreshed.status === 'draft') {
-        refreshed.status = 'pending_approval';
-        await refreshed.save();
-        logger.info(`Message ${message._id} set to pending_approval for admin review`);
-      }
-    }
-
-    return refreshed;
+    // Refresh message to return latest delivery status
+    return (await Message.findById(message._id)) || message;
   }
 }

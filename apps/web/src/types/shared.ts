@@ -88,7 +88,7 @@ export interface UpdateCategoryRequest {
 // ==========================================
 // 3. Source & Telegram Chat Types
 // ==========================================
-export type ChatType = 'channel' | 'supergroup' | 'group';
+export type ChatType = 'channel' | 'supergroup' | 'group' | 'private';
 export type SourceStatus = 'active' | 'paused' | 'disabled';
 
 export interface SourceDTO {
@@ -136,6 +136,13 @@ export interface DestinationVerification {
   failureReason?: string | null;
 }
 
+export interface DestinationCategoryBadge {
+  _id: string;
+  name: string;
+  iconEmoji?: string;
+  displayName?: string;
+}
+
 export interface DestinationDTO {
   _id: string;
   telegramChatId: string;
@@ -147,6 +154,8 @@ export interface DestinationDTO {
   type: ChatType;
   status: DestinationStatus;
   verification: DestinationVerification;
+  categoryIds?: string[];
+  categories?: DestinationCategoryBadge[];
   createdAt: string;
   updatedAt: string;
 }

@@ -109,11 +109,44 @@ export class BotAdminService {
 
     const admin = await BotAdminAuthService.getAuthorizedAdmin(fromId);
     if (!admin) {
+      // Auto-register user subscriber as active Destination
+      const userTitle =
+        [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ') ||
+        (ctx.from.username ? `@${ctx.from.username}` : `User ${fromId}`);
+
+      await Destination.findOneAndUpdate(
+        { telegramChatId: String(fromId) },
+        {
+          title: userTitle,
+          username: ctx.from.username ? ctx.from.username.toLowerCase().trim() : null,
+          type: 'private',
+          status: 'active',
+          verification: {
+            chatType: 'private',
+            isForum: false,
+            botRole: 'member',
+            isMember: true,
+            canPublish: true,
+            canSendAsChat: false,
+            senderIdentity: 'bot',
+            rights: {
+              canPostMessages: true,
+              canSendMessages: true,
+              canEditMessages: true,
+              canDeleteMessages: true,
+              canManageTopics: false,
+            },
+            lastCheckedAt: new Date().toISOString(),
+            failureReason: null,
+          },
+        },
+        { upsert: true, new: true }
+      );
+
       await ctx.reply(
-        '⛔ <b>Access Denied</b>\n\n' +
-          'You are not registered as an administrator for this bot.\n' +
-          `Your Telegram User ID is: <code>${fromId}</code>\n\n` +
-          'Please configure this ID in the system environment (<code>TELEGRAM_ADMIN_IDS</code>) or Web Admin Panel.',
+        `👋 <b>Welcome, ${BotKeyboardService.escapeHtml(ctx.from.first_name || 'Subscriber')}!</b>\n\n` +
+          `You have joined this Broadcast Channel & Bot.\n` +
+          `You will receive all broadcasts, updates, and announcements right here in this chat! 🔔`,
         { parse_mode: 'HTML' }
       );
       return;
@@ -599,9 +632,44 @@ export class BotAdminService {
 
     const admin = await BotAdminAuthService.getAuthorizedAdmin(fromId);
     if (!admin) {
-      await ctx.reply('⛔ <b>Unauthorized:</b> You are not registered as an administrator.', {
-        parse_mode: 'HTML',
-      });
+      const userTitle =
+        [ctx.from.first_name, ctx.from.last_name].filter(Boolean).join(' ') ||
+        (ctx.from.username ? `@${ctx.from.username}` : `User ${fromId}`);
+
+      await Destination.findOneAndUpdate(
+        { telegramChatId: String(fromId) },
+        {
+          title: userTitle,
+          username: ctx.from.username ? ctx.from.username.toLowerCase().trim() : null,
+          type: 'private',
+          status: 'active',
+          verification: {
+            chatType: 'private',
+            isForum: false,
+            botRole: 'member',
+            isMember: true,
+            canPublish: true,
+            canSendAsChat: false,
+            senderIdentity: 'bot',
+            rights: {
+              canPostMessages: true,
+              canSendMessages: true,
+              canEditMessages: true,
+              canDeleteMessages: true,
+              canManageTopics: false,
+            },
+            lastCheckedAt: new Date().toISOString(),
+            failureReason: null,
+          },
+        },
+        { upsert: true, new: true }
+      );
+
+      await ctx.reply(
+        `👋 <b>Hello ${BotKeyboardService.escapeHtml(ctx.from.first_name || 'Subscriber')}!</b>\n` +
+          `Your subscription is active. You will receive broadcasts and updates directly here! 🔔`,
+        { parse_mode: 'HTML' }
+      );
       return;
     }
 
@@ -1223,11 +1291,9 @@ export class BotAdminService {
       logger.info(`Admin ${admin.email} authored new post draft ${message._id} via Telegram Bot`);
 
       botSessionManager.clearAdminState(fromId);
-      const session = botSessionManager.getOrCreate(message._id.toString());
-      const { text: menuText, keyboard } = await BotKeyboardService.renderPostMenu(
-        message,
-        session
-      );
+      botSessionManager.getOrCreate(message._id.toString());
+      const { text: menuText, keyboard } =
+        await BotKeyboardService.renderCategoryBroadcastPrompt(message);
 
       await ctx.reply(menuText, {
         parse_mode: 'HTML',
@@ -1293,11 +1359,9 @@ export class BotAdminService {
         `Admin authored new album post ${message._id} (${items.length} items) via Telegram Bot`
       );
 
-      const session = botSessionManager.getOrCreate(message._id.toString());
-      const { text: menuText, keyboard } = await BotKeyboardService.renderPostMenu(
-        message,
-        session
-      );
+      botSessionManager.getOrCreate(message._id.toString());
+      const { text: menuText, keyboard } =
+        await BotKeyboardService.renderCategoryBroadcastPrompt(message);
 
       const bot = getTelegramBot();
       await bot.api.sendMessage(telegramChatId, menuText, {
@@ -1325,6 +1389,30 @@ export class BotAdminService {
         text: '⛔ Unauthorized: Admin access required',
         show_alert: true,
       });
+      return;
+    }
+
+    // 1b. Fast Category Broadcast Dispatch
+    if (callbackData.startsWith('bcast_cat:')) {
+      const parts = callbackData.split(':');
+      const messageId = parts[1];
+      const categoryId = parts[2];
+      await ctx.answerCallbackQuery({ text: '🚀 Dispatching broadcast...' });
+
+      if (messageId && categoryId) {
+        await this.handleCategoryBroadcast(ctx, messageId, categoryId, admin);
+      }
+      return;
+    }
+
+    if (callbackData.startsWith('bcast_all:')) {
+      const parts = callbackData.split(':');
+      const messageId = parts[1];
+      await ctx.answerCallbackQuery({ text: '🚀 Dispatching broadcast to all...' });
+
+      if (messageId) {
+        await this.handleBroadcastAll(ctx, messageId, admin);
+      }
       return;
     }
 
@@ -3504,5 +3592,153 @@ export class BotAdminService {
         }
       }
     }
+  }
+
+  /**
+   * Dispatches post broadcast to all destinations belonging to a selected category
+   */
+  public static async handleCategoryBroadcast(
+    ctx: Context,
+    messageId: string,
+    categoryId: string,
+    admin: any
+  ): Promise<void> {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      await ctx.reply('❌ <b>Post no longer exists.</b>', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      await ctx.reply('❌ <b>Category not found.</b>', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const destIds = (category.destinationIds || []).map((id) => id.toString());
+    if (destIds.length === 0) {
+      await ctx.reply(
+        `⚠️ <b>No Channels or Users in this Category!</b>\n\n` +
+          `Category <b>${BotKeyboardService.escapeHtml(category.displayName || category.name)}</b> currently has 0 connected targets.\n` +
+          `Please assign channels, groups, or users to this category in the Web Panel or Bot first!`,
+        {
+          parse_mode: 'HTML',
+          reply_markup: new InlineKeyboard()
+            .text('🔙 Back to Options', `b:${messageId}:menu`)
+            .text('❌ Cancel', `b:${messageId}:cnc`),
+        }
+      );
+      return;
+    }
+
+    // Filter active & publishable destinations
+    const activeDests = await Destination.find({
+      _id: { $in: destIds },
+      status: 'active',
+      'verification.canPublish': { $ne: false },
+    });
+
+    if (activeDests.length === 0) {
+      await ctx.reply(
+        `⚠️ <b>No active/verified destinations found</b> in category <b>${BotKeyboardService.escapeHtml(category.name)}</b>.`,
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    // Link category to the message
+    message.categoryId = category._id;
+    await message.save();
+
+    // Dispatch publication via canonical PublishService
+    const result = await PublishService.publishManual({
+      messageId,
+      destinationIds: activeDests.map((d) => d._id.toString()),
+      publishMode: 'copy',
+      userId: admin._id?.toString(),
+    });
+
+    const chCount = activeDests.filter((d) => d.type === 'channel').length;
+    const grpCount = activeDests.filter(
+      (d) => d.type === 'group' || d.type === 'supergroup'
+    ).length;
+    const usrCount = activeDests.filter((d) => d.type === 'private').length;
+
+    await ctx.reply(
+      `🎉 <b>BROADCAST DISPATCHED SUCCESSFULLY!</b>\n\n` +
+        `• 📁 <b>Category:</b> <b>${BotKeyboardService.escapeHtml(category.displayName || category.name)}</b>\n` +
+        `• 🎯 <b>Targets Reached (${activeDests.length}):</b>\n` +
+        `  📢 Channels: <code>${chCount}</code>\n` +
+        `  👥 Groups: <code>${grpCount}</code>\n` +
+        `  👤 Users: <code>${usrCount}</code>\n\n` +
+        `• 📊 <b>Status:</b> <code>${result.aggregateStatus.toUpperCase()}</code>\n` +
+        `• ⚡ <b>Mode:</b> <code>Clean Copy</code>`,
+      {
+        parse_mode: 'HTML',
+        reply_markup: new InlineKeyboard()
+          .text('✍️ New Broadcast', 'nav:new')
+          .text('📜 View History', 'nav:recent')
+          .row()
+          .text('⌂ Main Menu', 'nav:main'),
+      }
+    );
+  }
+
+  /**
+   * Dispatches post broadcast to ALL active channels, groups, and users
+   */
+  public static async handleBroadcastAll(
+    ctx: Context,
+    messageId: string,
+    admin: any
+  ): Promise<void> {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      await ctx.reply('❌ <b>Post no longer exists.</b>', { parse_mode: 'HTML' });
+      return;
+    }
+
+    const allDests = await Destination.find({
+      status: 'active',
+      'verification.canPublish': { $ne: false },
+    });
+
+    if (allDests.length === 0) {
+      await ctx.reply('⚠️ <b>No active channels, groups, or users connected yet!</b>', {
+        parse_mode: 'HTML',
+      });
+      return;
+    }
+
+    const result = await PublishService.publishManual({
+      messageId,
+      destinationIds: allDests.map((d) => d._id.toString()),
+      publishMode: 'copy',
+      userId: admin._id?.toString(),
+    });
+
+    const chCount = allDests.filter((d) => d.type === 'channel').length;
+    const grpCount = allDests.filter(
+      (d) => d.type === 'group' || d.type === 'supergroup'
+    ).length;
+    const usrCount = allDests.filter((d) => d.type === 'private').length;
+
+    await ctx.reply(
+      `🎉 <b>BROADCAST SENT TO ENTIRE NETWORK!</b>\n\n` +
+        `• 🎯 <b>Total Targets (${allDests.length}):</b>\n` +
+        `  📢 Channels: <code>${chCount}</code>\n` +
+        `  👥 Groups: <code>${grpCount}</code>\n` +
+        `  👤 Users: <code>${usrCount}</code>\n\n` +
+        `• 📊 <b>Status:</b> <code>${result.aggregateStatus.toUpperCase()}</code>\n` +
+        `• ⚡ <b>Mode:</b> <code>Clean Copy</code>`,
+      {
+        parse_mode: 'HTML',
+        reply_markup: new InlineKeyboard()
+          .text('✍️ New Broadcast', 'nav:new')
+          .text('📜 View History', 'nav:recent')
+          .row()
+          .text('⌂ Main Menu', 'nav:main'),
+      }
+    );
   }
 }

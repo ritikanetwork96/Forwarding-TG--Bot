@@ -374,11 +374,13 @@ export const DestinationSelector: React.FC<DestinationSelectorProps> = ({
                   {/* Status & Identity Pills */}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                      {dest.verification?.senderIdentity === 'channel' || dest.type === 'channel'
-                        ? 'Channel Identity'
-                        : dest.verification?.senderIdentity === 'anonymous_admin'
-                          ? 'Anonymous Admin'
-                          : 'Bot Identity'}
+                      {dest.type === 'private'
+                        ? 'Direct Subscriber'
+                        : dest.verification?.senderIdentity === 'channel' || dest.type === 'channel'
+                          ? 'Channel Identity'
+                          : dest.verification?.senderIdentity === 'anonymous_admin'
+                            ? 'Anonymous Admin'
+                            : 'Bot Identity'}
                     </span>
                     {isVerified ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

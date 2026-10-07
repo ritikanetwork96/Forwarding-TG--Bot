@@ -9,14 +9,16 @@ const publishManualSchema = z
     messageId: z.string().min(1, 'messageId is required'),
     destinationIds: z.array(z.string()).optional().default([]),
     destinationGroupIds: z.array(z.string()).optional().default([]),
+    categoryIds: z.array(z.string()).optional().default([]),
     publishMode: z.enum(['forward', 'copy']).optional(),
   })
   .refine(
     (data) =>
       (data.destinationIds && data.destinationIds.length > 0) ||
-      (data.destinationGroupIds && data.destinationGroupIds.length > 0),
+      (data.destinationGroupIds && data.destinationGroupIds.length > 0) ||
+      (data.categoryIds && data.categoryIds.length > 0),
     {
-      message: 'At least one destination or destination group is required',
+      message: 'At least one destination, destination group, or category is required',
       path: ['destinationIds'],
     }
   );
@@ -30,6 +32,7 @@ export class PublishController {
       messageId: validated.messageId,
       destinationIds: validated.destinationIds,
       destinationGroupIds: validated.destinationGroupIds,
+      categoryIds: validated.categoryIds,
       publishMode: validated.publishMode as PublishMode | undefined,
       userId,
     });

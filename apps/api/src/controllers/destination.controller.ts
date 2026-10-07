@@ -8,14 +8,17 @@ const createDestinationSchema = z.object({
   telegramChatId: z.string().min(1, 'telegramChatId is required'),
   title: z.string().min(1, 'Title is required').max(128),
   username: z.string().max(128).optional().nullable(),
-  type: z.enum(['channel', 'group', 'supergroup']).optional(),
+  type: z.enum(['channel', 'group', 'supergroup', 'private']).optional(),
+  categoryIds: z.array(z.string()).optional(),
 });
 
 const updateDestinationSchema = z.object({
   title: z.string().min(1).max(128).optional(),
+  displayName: z.string().max(128).optional().nullable(),
   username: z.string().max(128).optional().nullable(),
-  status: z.enum(['active', 'permission_missing', 'invalid', 'pending', 'paused']).optional(),
-  type: z.enum(['channel', 'group', 'supergroup']).optional(),
+  status: z.enum(['active', 'permission_missing', 'invalid', 'pending', 'disabled']).optional(),
+  type: z.enum(['channel', 'group', 'supergroup', 'private']).optional(),
+  categoryIds: z.array(z.string()).optional(),
 });
 
 export class DestinationController {
@@ -40,7 +43,11 @@ export class DestinationController {
         type?: ChatType;
       }
     );
-    sendSuccess(res, destination, 'Destination registered successfully', 201);
+    if (validated.categoryIds && validated.categoryIds.length > 0) {
+      await DestinationService.assignCategories(destination._id, validated.categoryIds);
+    }
+    const refreshed = await DestinationService.getById(destination._id);
+    sendSuccess(res, refreshed, 'Destination registered successfully', 201);
   }
 
   public static async verify(req: Request, res: Response): Promise<void> {
@@ -54,12 +61,17 @@ export class DestinationController {
       req.params.id as string,
       validated as {
         title?: string;
+        displayName?: string;
         username?: string | null;
         status?: DestinationStatus;
         type?: ChatType;
       }
     );
-    sendSuccess(res, destination, 'Destination updated successfully');
+    if (validated.categoryIds !== undefined) {
+      await DestinationService.assignCategories(req.params.id as string, validated.categoryIds);
+    }
+    const refreshed = await DestinationService.getById(req.params.id as string);
+    sendSuccess(res, refreshed, 'Destination updated successfully');
   }
 
   public static async delete(req: Request, res: Response): Promise<void> {

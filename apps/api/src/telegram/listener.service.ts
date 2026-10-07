@@ -7,6 +7,8 @@ import { BotAdminService } from './admin/bot-admin.service.js';
 
 let isListening = false;
 let handlersRegistered = false;
+let intentionalStop = false;
+let reconnectTimer: NodeJS.Timeout | null = null;
 
 function registerHandlers(): void {
   if (handlersRegistered) return;
@@ -239,6 +241,15 @@ function registerHandlers(): void {
     }
   });
 
+  // Global error handler: prevents unhandled update exceptions from crashing long-polling
+  bot.catch((err) => {
+    const ctx = err.ctx;
+    logger.error(
+      `Unhandled Telegram error while processing update [${ctx?.update?.update_id}]:`,
+      err.error
+    );
+  });
+
   handlersRegistered = true;
   logger.info('Telegram inbound update handlers registered');
 }
@@ -262,6 +273,12 @@ export async function startBotListener(): Promise<void> {
   if (env.NODE_ENV === 'test') {
     logger.debug('Skipping bot listener startup in test environment');
     return;
+  }
+
+  intentionalStop = false;
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
   }
 
   try {
@@ -326,10 +343,22 @@ export async function startBotListener(): Promise<void> {
       .catch((err) => {
         logger.error('Telegram bot polling encountered an unhandled error:', err);
         isListening = false;
+        if (!intentionalStop) {
+          logger.info('Scheduling automatic Telegram bot polling restart in 5 seconds...');
+          reconnectTimer = setTimeout(() => {
+            void startBotListener();
+          }, 5000);
+        }
       });
   } catch (err) {
     isListening = false;
     logger.error('Failed to start Telegram Bot listener:', err);
+    if (!intentionalStop) {
+      logger.info('Retrying Telegram Bot listener startup in 5 seconds...');
+      reconnectTimer = setTimeout(() => {
+        void startBotListener();
+      }, 5000);
+    }
   }
 }
 
@@ -337,6 +366,12 @@ export async function startBotListener(): Promise<void> {
  * Stops the long-running grammY bot listener cleanly
  */
 export async function stopBotListener(): Promise<void> {
+  intentionalStop = true;
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
   if (!isListening) return;
 
   try {

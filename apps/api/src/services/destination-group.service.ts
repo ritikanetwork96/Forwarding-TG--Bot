@@ -24,14 +24,17 @@ export function formatDestinationGroupDTO(group: IDestinationGroup): Destination
   };
 }
 
+import { Category } from '../models/category.model.js';
+
 export class DestinationGroupService {
   /**
-   * Resolves a collection of individual destinationIds and destinationGroupIds
+   * Resolves a collection of individual destinationIds, destinationGroupIds, and categoryIds
    * into a deduplicated list of Destination ObjectIds.
    */
   public static async resolveTargets(params: {
     destinationIds?: string[];
     destinationGroupIds?: string[];
+    categoryIds?: string[];
   }): Promise<Types.ObjectId[]> {
     const targetIdSet = new Set<string>();
 
@@ -55,6 +58,24 @@ export class DestinationGroupService {
         });
         for (const grp of groups) {
           for (const dId of grp.destinationIds || []) {
+            targetIdSet.add(dId.toString());
+          }
+        }
+      }
+    }
+
+    if (params.categoryIds && params.categoryIds.length > 0) {
+      const validCatIds = params.categoryIds
+        .filter((id) => id && Types.ObjectId.isValid(id))
+        .map((id) => new Types.ObjectId(id));
+
+      if (validCatIds.length > 0) {
+        const categories = await Category.find({
+          _id: { $in: validCatIds },
+          status: 'active',
+        });
+        for (const cat of categories) {
+          for (const dId of cat.destinationIds || []) {
             targetIdSet.add(dId.toString());
           }
         }

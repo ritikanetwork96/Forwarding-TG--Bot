@@ -12,6 +12,7 @@ export const PublishService = {
     messageId: string;
     destinationIds?: string[];
     destinationGroupIds?: string[];
+    categoryIds?: string[];
     publishMode?: PublishMode;
   }): Promise<PublishResultData> {
     return apiClient<PublishResultData>('/publish/manual', {

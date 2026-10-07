@@ -234,8 +234,8 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
   const executePublishMutation = useMutation({
     mutationFn: async () => {
       // 1. Validate destination count
-      if (selectedDestIds.length === 0 && selectedGroupIds.length === 0) {
-        throw new Error('Please select at least one target destination channel or group');
+      if (selectedDestIds.length === 0 && selectedGroupIds.length === 0 && !selectedCategoryId) {
+        throw new Error('Please select at least one target channel, group, or content category');
       }
 
       // Check for ongoing uploads
@@ -334,6 +334,7 @@ export const PublishingStudioModal: React.FC<PublishingStudioModalProps> = ({
         messageId: targetPostId,
         destinationIds: selectedDestIds,
         destinationGroupIds: selectedGroupIds,
+        categoryIds: selectedCategoryId ? [selectedCategoryId] : undefined,
         publishMode,
       });
 

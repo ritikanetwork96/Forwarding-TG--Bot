@@ -273,8 +273,60 @@ export class BotKeyboardService {
   }
 
   // ==========================================
-  // 3. POST EDITOR (COMPACT 2-COLUMN UX)
+  // 3. POST EDITOR & CATEGORY DISPATCH
   // ==========================================
+
+  /**
+   * Fast Category-Driven Broadcast Prompt
+   * Triggered when an admin forwards/authors a message in the bot.
+   * Shows 1-tap buttons for all Categories + "Send to All Targets".
+   */
+  public static async renderCategoryBroadcastPrompt(
+    message: IMessage
+  ): Promise<{ text: string; keyboard: InlineKeyboard }> {
+    const msgId = message._id.toString();
+    const categories = await Category.find({ status: { $ne: 'deleted' } }).sort({ name: 1 });
+    const allActiveDests = await Destination.find({
+      status: 'active',
+      'verification.canPublish': { $ne: false },
+    });
+
+    const chCount = allActiveDests.filter((d) => d.type === 'channel').length;
+    const grpCount = allActiveDests.filter(
+      (d) => d.type === 'group' || d.type === 'supergroup'
+    ).length;
+    const usrCount = allActiveDests.filter((d) => d.type === 'private').length;
+    const totalCount = allActiveDests.length;
+
+    const preview = this.formatContentPreview(message);
+
+    const text =
+      `<blockquote>📥 <b>POST RECEIVED & READY!</b></blockquote>\n\n` +
+      `${preview}\n\n` +
+      `<blockquote>🎯 <b>Choose Category to Broadcast:</b>\n` +
+      `• Total Network: <code>${totalCount}</code> (📢 ${chCount} ch | 👥 ${grpCount} grp | 👤 ${usrCount} usr)</blockquote>\n\n` +
+      `<i>Tap a Category button below to immediately dispatch this message to all connected channels, groups, and users:</i>`;
+
+    const keyboard = new InlineKeyboard();
+
+    // 1. One button per active category
+    for (const cat of categories) {
+      const count = (cat.destinationIds || []).length;
+      const emoji = cat.iconEmoji || '📁';
+      const catName = cat.displayName || cat.name;
+      keyboard
+        .text(`${emoji} ${catName} (${count} targets)`, `bcast_cat:${msgId}:${cat._id}`)
+        .row();
+    }
+
+    // 2. Broadcast to ALL targets button
+    keyboard.text(`📢 🚀 Send to ALL Targets (${totalCount})`, `bcast_all:${msgId}`).row();
+
+    // 3. Advanced Editor & Cancel
+    keyboard.text('⚙️ Advanced Options', `b:${msgId}:menu`).text('❌ Cancel', `b:${msgId}:cnc`);
+
+    return { text, keyboard };
+  }
 
   public static async renderPostMenu(
     message: IMessage,

@@ -55,7 +55,7 @@ const destinationSchema = new Schema<IDestination>(
     },
     type: {
       type: String,
-      enum: ['channel', 'supergroup', 'group'],
+      enum: ['channel', 'supergroup', 'group', 'private'],
       default: 'channel',
       required: true,
     },
@@ -69,7 +69,7 @@ const destinationSchema = new Schema<IDestination>(
     verification: {
       chatType: {
         type: String,
-        enum: ['channel', 'supergroup', 'group'],
+        enum: ['channel', 'supergroup', 'group', 'private'],
         default: 'channel',
         required: true,
       },

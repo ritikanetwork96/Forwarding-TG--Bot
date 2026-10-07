@@ -77,7 +77,7 @@ export const DestinationsPage: React.FC = () => {
 
   // Search & Type Filter State
   const [searchQuery, setSearchQuery] = useState('');
-  const [chatTypeFilter, setChatTypeFilter] = useState<'all' | 'channel' | 'group'>('all');
+  const [chatTypeFilter, setChatTypeFilter] = useState<'all' | 'channel' | 'group' | 'private'>('all');
 
   const filteredDestinations = React.useMemo(() => {
     return destinations.filter((dest) => {
@@ -92,13 +92,16 @@ export const DestinationsPage: React.FC = () => {
           ? true
           : chatTypeFilter === 'channel'
           ? dest.type === 'channel'
+          : chatTypeFilter === 'private'
+          ? dest.type === 'private'
           : dest.type === 'group' || dest.type === 'supergroup';
       return matchesSearch && matchesType;
     });
   }, [destinations, searchQuery, chatTypeFilter]);
 
   const channelCount = destinations.filter((d) => d.type === 'channel').length;
-  const groupCount = destinations.filter((d) => d.type !== 'channel').length;
+  const groupCount = destinations.filter((d) => d.type === 'group' || d.type === 'supergroup').length;
+  const userCount = destinations.filter((d) => d.type === 'private').length;
 
   // Destination Mutations
   const createDestMutation = useMutation({
@@ -408,6 +411,16 @@ export const DestinationsPage: React.FC = () => {
               >
                 <span>👥 Groups ({groupCount})</span>
               </button>
+              <button
+                onClick={() => setChatTypeFilter('private')}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+                  chatTypeFilter === 'private'
+                    ? 'bg-[#131722] text-white border border-white/[0.10]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>👤 Users ({userCount})</span>
+              </button>
             </div>
           </div>
 
@@ -445,6 +458,7 @@ export const DestinationsPage: React.FC = () => {
                 const isVerified = dest.verification?.canPublish;
                 const isVerifying = verifyingId === dest._id;
                 const isChannel = dest.type === 'channel';
+                const isPrivate = dest.type === 'private';
 
                 return (
                   <Card
@@ -457,7 +471,9 @@ export const DestinationsPage: React.FC = () => {
                       <div className="flex items-start justify-between gap-3 mb-2.5">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm shrink-0">{isChannel ? '📢' : '👥'}</span>
+                            <span className="text-sm shrink-0">
+                              {isChannel ? '📢' : isPrivate ? '👤' : '👥'}
+                            </span>
                             <h3 className="font-semibold text-white text-xs tracking-tight truncate">
                               {dest.displayName || dest.title}
                             </h3>
@@ -478,12 +494,28 @@ export const DestinationsPage: React.FC = () => {
                           className={`px-2 py-0.5 rounded-full text-[10px] font-mono border shrink-0 ${
                             isChannel
                               ? 'bg-sky-500/10 text-sky-400 border-sky-500/25'
+                              : isPrivate
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/25'
                               : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
                           }`}
                         >
-                          {isChannel ? 'Channel' : 'Group'}
+                          {isChannel ? 'Channel' : isPrivate ? 'User' : 'Group'}
                         </span>
                       </div>
+
+                      {/* Category Badges */}
+                      {dest.categories && dest.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2 pl-5">
+                          {dest.categories.map((cat) => (
+                            <span
+                              key={cat._id}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-violet-500/10 text-violet-300 border border-violet-500/20"
+                            >
+                              🏷️ {cat.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Health & Permissions Details Card */}
                       <div className="mt-3 p-3 rounded-lg bg-[#131722] border border-white/[0.06] space-y-2">
@@ -517,6 +549,11 @@ export const DestinationsPage: React.FC = () => {
 
                         {/* Telegram Granular Rights Pills */}
                         <div className="pt-2 border-t border-white/[0.06] flex flex-wrap gap-1 text-[10px]">
+                          {dest.type === 'private' && (
+                            <span className="px-1.5 py-0.5 rounded font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              direct_subscriber
+                            </span>
+                          )}
                           {dest.type === 'channel' && (
                             <span
                               className={`px-1.5 py-0.5 rounded font-mono ${
@@ -767,6 +804,7 @@ export const DestinationsPage: React.FC = () => {
                   <option value="channel">📢 Channel (Requires Admin can_post_messages)</option>
                   <option value="supergroup">👥 Supergroup (Member or Admin)</option>
                   <option value="group">👥 Group Chat (Standard Member)</option>
+                  <option value="private">👤 Private User Chat (Direct Subscriber)</option>
                 </select>
               </div>
 

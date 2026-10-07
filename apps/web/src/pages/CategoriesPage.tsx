@@ -480,13 +480,14 @@ export const CategoriesPage: React.FC = () => {
                       <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-1">
                         {linkedDests.map((dest) => {
                           const isChannel = dest.type === 'channel';
+                          const isUser = dest.type === 'private';
                           return (
                             <span
                               key={dest._id}
                               className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#131722] border border-white/[0.06] text-[10px] font-mono text-slate-300"
                               title={`${dest.title} (${dest.type})`}
                             >
-                              <span>{isChannel ? '📢' : '👥'}</span>
+                              <span>{isChannel ? '📢' : isUser ? '👤' : '👥'}</span>
                               <span className="truncate max-w-[100px]">
                                 {dest.displayName || dest.title}
                               </span>
@@ -725,6 +726,7 @@ export const CategoriesPage: React.FC = () => {
                     {destinations.map((dest) => {
                       const isSelected = selectedDestIds.includes(dest._id);
                       const isChannel = dest.type === 'channel';
+                      const isUser = dest.type === 'private';
 
                       return (
                         <div
@@ -737,7 +739,9 @@ export const CategoriesPage: React.FC = () => {
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs shrink-0">{isChannel ? '📢' : '👥'}</span>
+                            <span className="text-xs shrink-0">
+                              {isChannel ? '📢' : isUser ? '👤' : '👥'}
+                            </span>
                             <div className="min-w-0">
                               <p className="text-xs font-medium truncate leading-tight">
                                 {dest.displayName || dest.title}

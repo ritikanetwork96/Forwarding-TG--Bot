@@ -289,17 +289,19 @@ export class PublishService {
     messageId: string;
     destinationIds?: string[];
     destinationGroupIds?: string[];
+    categoryIds?: string[];
     publishMode?: PublishMode;
     userId?: string;
   }): Promise<PublishResultData> {
     const resolvedObjectIds = await DestinationGroupService.resolveTargets({
       destinationIds: data.destinationIds,
       destinationGroupIds: data.destinationGroupIds,
+      categoryIds: data.categoryIds,
     });
 
     if (resolvedObjectIds.length === 0) {
       throw new BadRequestError(
-        'At least one valid destination or destination group must be selected',
+        'At least one valid destination, group, or category must be selected',
         ErrorCodes.NO_TARGETS_SELECTED
       );
     }
@@ -322,10 +324,18 @@ export class PublishService {
     messageId: string;
     destinationIds?: string[];
     destinationGroupIds?: string[];
+    categoryIds?: string[];
     publishMode?: PublishMode;
     ruleId?: string;
   }): Promise<PublishResultData> {
-    const { messageId, destinationIds, destinationGroupIds, publishMode = 'copy', ruleId } = data;
+    const {
+      messageId,
+      destinationIds,
+      destinationGroupIds,
+      categoryIds,
+      publishMode = 'copy',
+      ruleId,
+    } = data;
 
     const message = await Message.findById(messageId);
     if (!message) {
@@ -335,6 +345,7 @@ export class PublishService {
     const resolvedObjectIds = await DestinationGroupService.resolveTargets({
       destinationIds,
       destinationGroupIds,
+      categoryIds,
     });
 
     const targetDestinationIds = resolvedObjectIds.map((id) => id.toString());
