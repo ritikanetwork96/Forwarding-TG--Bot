@@ -57,7 +57,7 @@ export class DestinationController {
 
   public static async update(req: Request, res: Response): Promise<void> {
     const validated = updateDestinationSchema.parse(req.body);
-    const destination = await DestinationService.update(
+    await DestinationService.update(
       req.params.id as string,
       validated as {
         title?: string;
